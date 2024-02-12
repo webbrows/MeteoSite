@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сайт метеостанций</title>
+	<!-- карта пока такая другие требуют АПИ , а у меня нет их то не входит в акк , то просто не грузится =) -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        /* CSS стили */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        #station-info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        /* CSS для карты */
+        #map {
+            height: 400px;
+        }
+        #sensor-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #sensor-table th, #sensor-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Сайт метеостанций</h1>
+        
+        <div id="station-info">
+            <!-- Сюда будут динамически добавляться данные о метеостанции -->
+        </div>
+        <div id="buttons">
+        <!-- Кнопки для переключения между предыдущей и следующей метеостанцией -->
+        <button id="prevBtn">Предыдущая станция</button>
+        <button id="nextBtn">Следующая станция</button>
+		</div>
+        <div id="map">
+            <!-- Сюда будет добавлена интерактивная карта с метками метеостанций -->
+        </div>
+        
+        <table id="sensor-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Местоположение</th>
+                    <th>Температура</th>
+                    <th>Влажность</th>
+                    <th>Давление</th>
+                    <th>Время</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Сюда будут динамически добавляться данные о датчиках -->
+            </tbody>
+        </table>
+    </div>
+	<script src="map.js"></script>
+    <script>
+        // JavaScript код для взаимодействия с данными и создания интерактивных элементов
+        
+        // Массив данных о метеостанциях-заглушка
+        const stations = [
+            { id: 1, location: "Москва",lat: 55.7558, lon: 37.6176 , temperature: 20, humidity: 60, pressure: 1013, time: "12:00" },
+            { id: 2, location: "Санкт-Петербург",lat:59.9343, lon: 30.3351, temperature: 18, humidity: 65, pressure: 1010, time: "12:05" },
+			{ id: 3, location: "Москва",lat:69.9343, lon: 30.3351, temperature: 30, humidity: 60, pressure: 1013, time: "12:01" },
+            { id: 4, location: "Санкт-Петербург",lat:79.9343, lon: 30.3351, temperature: 48, humidity: 65, pressure: 1010, time: "13:05" },
+        ];
+		
+		
+		
+		// Создаем карту
+        var map = L.map('map').setView([55.7558, 37.6176], 5);
+
+        // Добавляем плитку OpenStreetMap на карту
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Добавляем метки станций на карту
+        stations.forEach(station => {
+            L.marker([station.lat, station.lon]).addTo(map)
+                .bindPopup(station.location);
+        });
+		
+		
+		
+        let currentStationIndex = 0;
+        // Функция для отображения информации о метеостанции
+        function showStationInfo(station) {
+            const stationInfoDiv = document.getElementById('station-info');
+            stationInfoDiv.innerHTML = `
+                <p>Местоположение: ${station.location}</p>
+                <p>Температура: ${station.temperature}°C</p>
+                <p>Влажность: ${station.humidity}%</p>
+                <p>Давление: ${station.pressure} мм рт. ст.</p>
+                <p>Время: ${station.time}</p>
+            `;
+        }//следующей
+         function showNextStation() {
+            currentStationIndex = (currentStationIndex + 1) % stations.length;
+            showStationInfo(stations[currentStationIndex]);
+        }
+
+        // Функция для отображения предыдущей метеостанции
+        function showPrevStation() {
+            currentStationIndex = (currentStationIndex - 1 + stations.length) % stations.length;
+            showStationInfo(stations[currentStationIndex]);
+        }
+        // Функция для отображения таблицы с данными о датчиках
+        function showSensorData() {
+            const sensorTableBody = document.querySelector('#sensor-table tbody');
+            sensorTableBody.innerHTML = '';
+            stations.forEach(station => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${station.id}</td>
+                    <td>${station.location}</td>
+                    <td>${station.temperature}°C</td>
+                    <td>${station.humidity}%</td>
+                    <td>${station.pressure} мм рт. ст.</td>
+                    <td>${station.time}</td>
+                `;
+                sensorTableBody.appendChild(row);
+            });
+        }
+        
+        // При загрузке страницы вызываем необходимые функции для отображения данных
+        window.onload = function() {
+            document.getElementById('prevBtn').addEventListener('click', showPrevStation);
+            document.getElementById('nextBtn').addEventListener('click', showNextStation);
+            showStationInfo(stations[currentStationIndex]); // Показываем информацию о первой метеостанции
+            showSensorData(); // Показываем данные о датчиках
+        };
+    </script>
+</body>
+</html>
+<!-- Сделано по просьбе =) 
+by DE -->
